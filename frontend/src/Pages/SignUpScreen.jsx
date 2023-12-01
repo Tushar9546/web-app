@@ -14,6 +14,15 @@ import "../Styles/SignUp.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toastAlert } from "../Components/utils/action";
+import { useDispatch, useSelector } from "react-redux";
+import { AuthSignupReducer } from "../Redux/AuthRedux/reducer";
+import {
+  SIGNUP_FAILURE,
+  SIGNUP_SUCCESS,
+  SIGNUP_REQUEST,
+  LOGIN_SUCCESS,
+} from "../Redux/AuthRedux/actionTypes";
+
 const URL_MAIN = process.env.REACT_APP_MAIN_URL;
 
 let formData = {
@@ -23,6 +32,8 @@ let formData = {
 };
 
 const SignUpScreen = () => {
+  let dispatch = useDispatch();
+  const Rstate = useSelector((state) => state.AuthSignupReducer);
   const navigate = useNavigate();
   const [data, setData] = useState(formData);
   const toast = useToast();
@@ -37,41 +48,40 @@ const SignUpScreen = () => {
   };
 
   const handleSubmit = () => {
-    toastAlert(toast, "fff", "success");
-    // const { name, email, password } = data;
-    // if (email && name && password) {
-    //   axios
-    //     .post(URL_MAIN + "signup", { body: data })
-    //     .then((res) => {
-    //       if (res.data.status === 404) {
-    //         toastAlert(toast, res.data.msg, "error");
-    //         return dispatch({
-    //           type: SIGNUP_FAILURE,
-    //           payload: res.data,
-    //         });
-    //       } else if (res.data.status === 200) {
-    //         toastAlert(toast, res.data.msg, "success");
-    //         setTimeout(() => {
-    //           return navigate("/LoginScreen");
-    //         }, 2000);
-    //         console.log(
-    //           dispatch({
-    //             type: SIGNUP_SUCCESS,
-    //             payload: res.data,
-    //           })
-    //         );
-    //         return dispatch({
-    //           type: SIGNUP_SUCCESS,
-    //           payload: res.data,
-    //         });
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       toastAlert(toast, "Somthing went wrong", "error");
-    //     });
-    // } else {
-    //   toastAlert(toast, "All fields are required ", "warning");
-    // }
+    const { name, email, password } = data;
+    if (email && name && password) {
+      axios
+        .post("http://localhost:8080/user/signup", { body: data })
+        .then((res) => {
+          if (res.data.status === 404) {
+            toastAlert(toast, res.msg, "error");
+            return dispatch({
+              type: SIGNUP_FAILURE,
+              payload: res.data,
+            });
+          } else if (res.status === 200) {
+            toastAlert(toast, res.msg, "success");
+            setTimeout(() => {
+              return navigate("/LoginScreen");
+            }, 2000);
+            console.log(
+              dispatch({
+                type: SIGNUP_SUCCESS,
+                payload: res.data,
+              })
+            );
+            return dispatch({
+              type: SIGNUP_SUCCESS,
+              payload: res.data,
+            });
+          }
+        })
+        .catch((err) => {
+          toastAlert(toast, "Somthing went wrong", "error");
+        });
+    } else {
+      toastAlert(toast, "All fields are required ", "warning");
+    }
   };
 
   const hanleRender = () => {

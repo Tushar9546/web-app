@@ -14,6 +14,14 @@ import "../Styles/SignUp.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toastAlert } from "../Components/utils/action";
+import { useDispatch, useSelector } from "react-redux";
+import { AuthSignupReducer } from "../Redux/AuthRedux/reducer";
+import {
+  SIGNUP_FAILURE,
+  SIGNUP_SUCCESS,
+  SIGNUP_REQUEST,
+  LOGIN_SUCCESS,
+} from "../Redux/AuthRedux/actionTypes";
 const URL_MAIN = process.env.REACT_APP_MAIN_URL;
 
 const loginForMData = {
@@ -22,6 +30,8 @@ const loginForMData = {
 };
 
 function LoginScreen() {
+  let dispatch = useDispatch();
+  const Rstate = useSelector((state) => state.AuthSignupReducer);
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState(loginForMData);
   const toast = useToast();
@@ -38,12 +48,12 @@ function LoginScreen() {
     const { email, password } = loginData;
     if (email && password) {
       axios
-        .post(URL_MAIN + "login", {
+        .post("http://localhost:8080/user/login", {
           data: loginData,
         })
         .then((res) => {
-          let status = res.data.status;
-          if (status === 200) {
+          let status = res.status;
+          if (status == 200) {
             toastAlert(toast, "Login Successful", "success");
             localStorage.setItem("token", res.data.token);
             dispatch({
@@ -57,7 +67,7 @@ function LoginScreen() {
           }
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err, "aaaaaaaaaaaaaa")
         });
     }
   };
